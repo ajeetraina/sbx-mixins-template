@@ -21,7 +21,7 @@ commands:
       user: "1000"
       description: "Install Ruff"
 
-memory: |
+agentContext: |
   ## Ruff linter
 
   `ruff` is installed. Run `ruff check --fix .` to lint and auto-fix, and

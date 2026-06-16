@@ -71,10 +71,9 @@ commands:
 # the capability exists and how to call it. Without this, the tool is installed but
 # the agent won't reach for it. Keep it short and action-oriented.
 #
-# NOTE: newer sbx schemas call this `agentContext`. This repo's examples use
-# `memory` to match what the published mem0 kit ships; if `sbx kit validate`
-# rejects `memory`, rename it to `agentContext`.
-memory: |
+# NOTE: this is the current field name. Older kits (e.g. published mem0) use
+# `memory`, which still works but makes `sbx kit validate` warn it's deprecated.
+agentContext: |
   ## <Capability name>
 
   <One short paragraph telling the agent the tool is installed, where its config

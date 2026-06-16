@@ -52,7 +52,7 @@ LICENSE
 | `environment.proxyManaged` | – | Names of vars whose secret values the proxy injects at runtime. |
 | `commands.install` | – | Runs **once** at creation. Use `user: "1000"`. |
 | `commands.initFiles` | – | Config files written at startup (`onlyIfMissing` keeps user edits). |
-| `memory` / `agentContext` | – | Tells the agent the capability exists and how to call it. |
+| `agentContext` | – | Tells the agent the capability exists and how to call it. |
 
 ### Secrets: never hardcode
 
@@ -63,14 +63,15 @@ A mixin must not contain an API key. Instead:
 3. The sbx proxy injects it into the sandbox at runtime (`sbx run` has no `-e` flag),
    so the key never enters the spec, the image, or the sandbox filesystem.
 
-### The `memory` block matters
+### The `agentContext` block matters
 
-Installing a tool is not enough — the agent has to *know* it's there. The `memory`
-block is appended to the agent's memory file (`CLAUDE.md` / `AGENTS.md`) so the
-agent reaches for your tool. Keep it short and tell it the exact command to run.
+Installing a tool is not enough — the agent has to *know* it's there. The
+`agentContext` block is appended to the agent's memory file (`CLAUDE.md` /
+`AGENTS.md`) so the agent reaches for your tool. Keep it short and tell it the
+exact command to run.
 
-> Newer sbx schemas name this field `agentContext`. If `sbx kit validate` rejects
-> `memory`, rename it to `agentContext`.
+> This is the current field name. Older kits (including the published mem0 kit)
+> use `memory`; it still works but `sbx kit validate` warns it's deprecated.
 
 ## Variants (optional)
 
