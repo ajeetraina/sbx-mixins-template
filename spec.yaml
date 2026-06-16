@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# sbx mixin kit — TEMPLATE
+#
+# A mixin layers tools, environment, credentials, network rules, and files onto
+# an *existing* sbx agent (claude, codex, gemini, …). It does NOT define an agent
+# of its own — that is a `kind: sandbox` kit. Keep everything below scoped to
+# "what extra capability am I adding to whatever agent the user already runs?"
+#
+# Fill in every <PLACEHOLDER>. Delete the install/initFiles/network blocks you
+# don't need — they are all optional except schemaVersion, kind, and name.
+# Validate before pushing:  sbx kit validate .
+# ─────────────────────────────────────────────────────────────────────────────
+
+schemaVersion: "1"
+kind: mixin
+name: <kit-name>                       # machine id, kebab-case, e.g. "mem0"
+displayName: <Human Readable Name>     # shown in UIs, e.g. "Mem0 (Docker Model Runner)"
+description: "<one sentence: what capability this adds and any key caveat (e.g. where a secret comes from).>"
+
+# Domains the mixin's install + runtime traffic needs. The sandbox is deny-by-default,
+# so anything not listed here is blocked. pypi/files.pythonhosted are the usual pair
+# for pip; add github/raw.githubusercontent for `curl | bash` installers; add your
+# service's API host for runtime calls. Org governance policy can still override these.
+network:
+  allowedDomains:
+    - pypi.org
+    - files.pythonhosted.org
+    - raw.githubusercontent.com
+    - github.com
+    # - api.<your-service>.com          # runtime API host, if any
+
+# Static env vars baked into the sandbox. Put NON-secret config here.
+# For SECRETS, do not hardcode — see `proxyManaged` below.
+environment:
+  variables:
+    <YOUR_VAR>: "<value>"
+    # Example: turn off a tool's telemetry, set a base URL, etc.
+
+  # Names of env vars whose VALUES the sbx proxy injects at runtime from a stored
+  # secret (`sbx secret set -g <name>`). The value never enters the spec or the
+  # sandbox image. Uncomment and list the var name(s) your tool reads:
+  # proxyManaged:
+  #   - <YOUR_SERVICE>_API_KEY
+
+commands:
+  # Runs ONCE at sandbox creation. Run as user "1000" (the agent user) so binaries
+  # land in ~/.local and you don't need root. Use --break-system-packages for pip
+  # on PEP 668 images.
+  install:
+    - command: "pip install --break-system-packages '<your-package>==<pin>'"
+      user: "1000"
+      description: "<what this installs>"
+    # - command: "curl -fsSL https://example.com/install.sh | bash"
+    #   user: "1000"
+    #   description: "<alt: shell installer>"
+
+  # Files written into the sandbox at startup. Use for config the tool reads.
+  # `${WORKDIR}` and other runtime vars are substituted. `onlyIfMissing: true`
+  # means user edits survive a restart.
+  initFiles:
+    - path: /home/agent/.<tool>/config.<ext>
+      mode: "0644"
+      onlyIfMissing: true
+      description: "<what this config does>"
+      content: |
+        {
+          "todo": "replace with your tool's config"
+        }
+
+# Injected into the agent's memory file (CLAUDE.md / AGENTS.md) so the agent KNOWS
+# the capability exists and how to call it. Without this, the tool is installed but
+# the agent won't reach for it. Keep it short and action-oriented.
+#
+# NOTE: newer sbx schemas call this `agentContext`. This repo's examples use
+# `memory` to match what the published mem0 kit ships; if `sbx kit validate`
+# rejects `memory`, rename it to `agentContext`.
+memory: |
+  ## <Capability name>
+
+  <One short paragraph telling the agent the tool is installed, where its config
+  lives, and the one-liner to use it.>

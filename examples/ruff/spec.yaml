@@ -1,0 +1,28 @@
+# Worked example: a minimal, no-secret mixin that adds the Ruff linter to any
+# agent. Copy this as a starting point when your tool needs no credentials.
+schemaVersion: "1"
+kind: mixin
+name: ruff
+displayName: Ruff (Python linter)
+description: "Adds the Ruff linter/formatter to any agent so it can lint and fix Python before committing. No credentials, no network at runtime."
+
+network:
+  allowedDomains:
+    - pypi.org
+    - files.pythonhosted.org
+
+environment:
+  variables:
+    RUFF_NO_UPDATE_CHECK: "1"
+
+commands:
+  install:
+    - command: "pip install --break-system-packages 'ruff==0.14.4'"
+      user: "1000"
+      description: "Install Ruff"
+
+memory: |
+  ## Ruff linter
+
+  `ruff` is installed. Run `ruff check --fix .` to lint and auto-fix, and
+  `ruff format .` to format, before committing Python changes.
